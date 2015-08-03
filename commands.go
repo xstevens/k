@@ -141,6 +141,7 @@ func runConsume(cmd *Command, args []string) {
 	// TODO: support consuming all partitions
 	partConsumer, err := consumer.ConsumePartition(topic, partition, startingOffset)
 	must(err)
+	defer partConsumer.Close()
 
 	var received, errors int
 consumerLoop:
