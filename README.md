@@ -25,6 +25,7 @@ accepted environment var: KAFKA_BROKERS
 Commands:
     produce     produce messages to given topic
     consume     consume messages from given topic
+    offsets     show the oldest and newest offset for a given topic and partition
     help        show help
 
 Run 'k help <command>' for details.
