@@ -18,8 +18,19 @@ func brokers() []string {
 	return strings.Split(s, ",")
 }
 
+func offsets(client sarama.Client, topic string, partition int32) (oldest int64, newest int64) {
+	oldest, err := client.GetOffset(topic, partition, sarama.OffsetOldest)
+	must(err)
+	newest, err = client.GetOffset(topic, partition, sarama.OffsetNewest)
+	must(err)
+	return oldest, newest
+}
+
 var (
-	topic string
+	topic     string
+	partition int32
+	offset    int64
+	n         int
 )
 
 var cmdProduce = &Command{
@@ -89,7 +100,7 @@ producerLoop:
 }
 
 var cmdConsume = &Command{
-	Usage: "consume --topic <topic>",
+	Usage: "consume --topic <topic> [--partition <partition>] [--offset <offset>] [-n <n_messages>]",
 	Short: "consume messages from given topic",
 	Long: `
 Consumes messages from the given topic and writes them to stdout.
@@ -103,48 +114,45 @@ Example:
 func runConsume(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
-	config.ClientID = "k produce"
+	config.ClientID = "k consume"
 	config.Consumer.Return.Errors = true
 	client, err := sarama.NewClient(brokers, config)
 	must(err)
 	defer client.Close()
 
-	// parts, err := client.Partitions(topic)
-	// must(err)
-
-	leader, err := sarama.NewConsumerFromClient(client)
+	consumer, err := sarama.NewConsumerFromClient(client)
 	must(err)
-	defer leader.Close()
+	defer consumer.Close()
 
 	signals := make(chan os.Signal, 1)
 	defer close(signals)
 	signal.Notify(signals, os.Interrupt)
 
-	// TODO: support specifying offsets and relative offsets
-	//latestOffset, err := client.GetOffset(topic, 0, sarama.OffsetNewest)
-	earliestOffset, err := client.GetOffset(topic, 0, sarama.OffsetOldest)
+	// calculate a starting offset
+	_, newestOffset := offsets(client, topic, partition)
 	must(err)
-	startingOffset := earliestOffset
+	startingOffset := newestOffset - 1
+	if offset < 0 {
+		startingOffset = newestOffset + offset
+	} else if offset >= 0 {
+		startingOffset = offset
+	}
 
 	// TODO: support consuming all partitions
-	consumer, err := leader.ConsumePartition(topic, 0, startingOffset)
+	partConsumer, err := consumer.ConsumePartition(topic, partition, startingOffset)
 	must(err)
-	// for _, part := range parts {
-	// 	latestOffset, err := client.GetOffset(*topic, 0, sarama.OffsetNewest)
-	// 	if err == nil {
-	// 		consumer, err := leader.ConsumePartition(*topic, part, latestOffset)
-	// 		must(err)
-	// 	}
-	// }
 
 	var received, errors int
 consumerLoop:
 	for {
 		select {
-		case msg := <-consumer.Messages():
+		case msg := <-partConsumer.Messages():
 			fmt.Println(string(msg.Value))
 			received++
-		case err := <-consumer.Errors():
+			if n > 0 && received >= n {
+				break consumerLoop
+			}
+		case err := <-partConsumer.Errors():
 			fmt.Fprintf(os.Stderr, "Failed to receive message: %s\n", err)
 			errors++
 		case <-signals:
@@ -155,7 +163,43 @@ consumerLoop:
 	fmt.Fprintf(os.Stderr, "messages received: %d, errors: %d\n", received, errors)
 }
 
+var cmdOffsets = &Command{
+	Usage: "offsets --topic <topic>",
+	Short: "show the oldest and newest offset for a given topic and partition",
+	Long: `
+Prints oldest and newest offsets for the given topic to stdout.
+
+Example:
+
+    $ k offsets --topic foo`,
+	Run: runOffsets,
+}
+
+func runOffsets(cmd *Command, args []string) {
+	brokers := brokers()
+	config := sarama.NewConfig()
+	config.ClientID = "k offsets"
+	client, err := sarama.NewClient(brokers, config)
+	must(err)
+	defer client.Close()
+
+	// get partitions for topic
+	parts, err := client.Partitions(topic)
+	must(err)
+
+	// print offsets for each partition
+	for _, part := range parts {
+		oldestOffset, newestOffset := offsets(client, topic, 0)
+		must(err)
+		fmt.Printf("partition=%d oldest=%d newest=%d\n", part, oldestOffset, newestOffset)
+	}
+}
+
 func init() {
-	cmdProduce.Flag.StringVarP(&topic, "topic", "t", "k", "topic")
-	cmdConsume.Flag.StringVarP(&topic, "topic", "t", "k", "topic")
+	cmdProduce.Flag.StringVarP(&topic, "topic", "t", "k", "produce to topic")
+	cmdConsume.Flag.StringVarP(&topic, "topic", "t", "k", "topic to consume")
+	cmdConsume.Flag.Int32VarP(&partition, "partition", "p", 0, "partition to consume")
+	cmdConsume.Flag.Int64VarP(&offset, "offset", "o", -1, "starting offset for consumer")
+	cmdConsume.Flag.IntVarP(&n, "n", "n", -1, "number of messages to consume")
+	cmdOffsets.Flag.StringVarP(&topic, "topic", "t", "k", "get offsets for topic")
 }

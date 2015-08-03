@@ -83,6 +83,7 @@ func init() {
 	commands = []*Command{
 		cmdProduce,
 		cmdConsume,
+		cmdOffsets,
 		cmdHelp,
 	}
 }
