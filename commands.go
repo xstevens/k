@@ -131,14 +131,15 @@ func runConsume(cmd *Command, args []string) {
 	// calculate a starting offset
 	_, newestOffset := offsets(client, topic, partition)
 	must(err)
-	startingOffset := newestOffset - 1
+	startingOffset := newestOffset
 	if offset < 0 {
 		startingOffset = newestOffset + offset
-	} else if offset >= 0 {
+	} else if offset > 0 {
 		startingOffset = offset
 	}
 
 	// TODO: support consuming all partitions
+	fmt.Fprintf(os.Stderr, "Using starting offset: %d\n", startingOffset)
 	partConsumer, err := consumer.ConsumePartition(topic, partition, startingOffset)
 	must(err)
 	defer partConsumer.Close()
@@ -161,7 +162,7 @@ consumerLoop:
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "messages received: %d, errors: %d\n", received, errors)
+	fmt.Fprintf(os.Stderr, "Messages received: %d, errors: %d\n", received, errors)
 }
 
 var cmdOffsets = &Command{
@@ -200,7 +201,7 @@ func init() {
 	cmdProduce.Flag.StringVarP(&topic, "topic", "t", "k", "produce to topic")
 	cmdConsume.Flag.StringVarP(&topic, "topic", "t", "k", "topic to consume")
 	cmdConsume.Flag.Int32VarP(&partition, "partition", "p", 0, "partition to consume")
-	cmdConsume.Flag.Int64VarP(&offset, "offset", "o", -1, "starting offset for consumer")
+	cmdConsume.Flag.Int64VarP(&offset, "offset", "o", 0, "starting offset for consumer")
 	cmdConsume.Flag.IntVarP(&n, "n", "n", -1, "number of messages to consume")
 	cmdOffsets.Flag.StringVarP(&topic, "topic", "t", "k", "get offsets for topic")
 }
