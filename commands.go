@@ -85,7 +85,14 @@ func runProduce(cmd *Command, args []string) {
 	scanner := bufio.NewScanner(os.Stdin)
 producerLoop:
 	for scanner.Scan() {
-		msg := &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.ByteEncoder(scanner.Bytes())}
+		line := scanner.Text()
+		idx := strings.Index(line, "\t")
+		var msg *sarama.ProducerMessage
+		if idx > 0 {
+			msg = &sarama.ProducerMessage{Topic: topic, Key: sarama.ByteEncoder(line[0:idx]), Value: sarama.ByteEncoder(line[idx+1:])}
+		} else {
+			msg = &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.ByteEncoder(line)}
+		}
 		select {
 		case producer.Input() <- msg:
 			enqueued++
@@ -149,6 +156,9 @@ consumerLoop:
 	for {
 		select {
 		case msg := <-partConsumer.Messages():
+			if msg.Key != nil {
+				fmt.Printf("%s\t", string(msg.Key))
+			}
 			fmt.Println(string(msg.Value))
 			received++
 			if n > 0 && received >= n {
