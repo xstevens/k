@@ -28,9 +28,9 @@ func (c *Command) Name() string {
 
 func printOverviewUsage(w io.Writer) {
 	fmt.Fprintf(w, "Usage: k <command> [options] [arguments]\n")
-	fmt.Fprintf(w, "\naccepted environment var: KAFKA_BROKERS\n")
-	fmt.Fprintf(w, "\n")
-	fmt.Fprintf(w, "Commands:\n")
+	fmt.Fprintf(w, "\nEnvironment Variables: \n")
+	fmt.Fprintf(w, "    KAFKA_BROKERS\n")
+	fmt.Fprintf(w, "\nCommands:\n")
 	for _, command := range commands {
 		fmt.Fprintf(w, "    %-8s    %s\n", command.Name(), command.Short)
 	}
@@ -84,6 +84,7 @@ func init() {
 		cmdProduce,
 		cmdConsume,
 		cmdOffsets,
+		cmdTopics,
 		cmdHelp,
 	}
 }
