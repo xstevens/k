@@ -20,12 +20,14 @@ gox -osarch="linux/amd64"
 $ ./k help
 Usage: k <command> [options] [arguments]
 
-accepted environment var: KAFKA_BROKERS
+Environment Variables:
+    KAFKA_BROKERS
 
 Commands:
     produce     produce messages to given topic
     consume     consume messages from given topic
     offsets     show the oldest and newest offset for a given topic and partition
+    topics      show the list of topics
     help        show help
 
 Run 'k help <command>' for details.
