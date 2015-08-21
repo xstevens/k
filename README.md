@@ -9,7 +9,7 @@ go build
 
 ### Cross-compiling
 
-I typically use gox for cross-compiling. Once it's installed it's really easy to use.
+I typically use [gox](https://github.com/mitchellh/gox) for cross-compiling. Once it's installed it's really easy to use.
 
 ```
 gox -osarch="linux/amd64"
