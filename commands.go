@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"github.com/shopify/sarama"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"strings"
@@ -16,6 +19,41 @@ func brokers() []string {
 		s = "127.0.0.1:9092"
 	}
 	return strings.Split(s, ",")
+}
+
+func tlsConfig() (useTLS bool, config *tls.Config, err error) {
+	// if SSL_CA_BUNDLE_PATH isn't set, just don't use TLS at all
+	caPath := os.Getenv("SSL_CA_BUNDLE_PATH")
+	if caPath == "" {
+		return
+	}
+	useTLS = true
+	config = new(tls.Config)
+	caCerts, err := ioutil.ReadFile(caPath)
+	if err != nil {
+		err = fmt.Errorf("error reading $SSL_CA_BUNDLE_PATH: %v", err)
+		return
+	}
+
+	config.RootCAs = x509.NewCertPool()
+	if !config.RootCAs.AppendCertsFromPEM(caCerts) {
+		err = fmt.Errorf("$SSL_CA_BUNDLE_PATH=%q was empty", caPath)
+		return
+	}
+
+	// if $SSL_CERT_PATH or $SSL_KEY_PATH aren't set, skip client cert
+	certPath, keyPath := os.Getenv("SSL_CERT_PATH"), os.Getenv("SSL_KEY_PATH")
+	if certPath == "" || keyPath == "" {
+		return
+	}
+
+	keypair, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		err = fmt.Errorf("error reading $SSL_CRT_PATH/$SSL_KEY_PATH: %v", err)
+		return
+	}
+	config.Certificates = []tls.Certificate{keypair}
+	return
 }
 
 func offsets(client sarama.Client, topic string, partition int32) (oldest int64, newest int64) {
@@ -49,6 +87,10 @@ Example:
 func runProduce(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
+	useTLS, tlsConfig, err := tlsConfig()
+	must(err)
+	config.Net.TLS.Enable = useTLS
+	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k produce"
 	config.Producer.Return.Successes = true
 	client, err := sarama.NewClient(brokers, config)
@@ -121,6 +163,10 @@ Example:
 func runConsume(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
+	useTLS, tlsConfig, err := tlsConfig()
+	must(err)
+	config.Net.TLS.Enable = useTLS
+	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k consume"
 	config.Consumer.Return.Errors = true
 	client, err := sarama.NewClient(brokers, config)
@@ -190,6 +236,10 @@ Example:
 func runOffsets(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
+	useTLS, tlsConfig, err := tlsConfig()
+	must(err)
+	config.Net.TLS.Enable = useTLS
+	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k offsets"
 	client, err := sarama.NewClient(brokers, config)
 	must(err)
@@ -222,6 +272,10 @@ Example:
 func runTopics(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
+	useTLS, tlsConfig, err := tlsConfig()
+	must(err)
+	config.Net.TLS.Enable = useTLS
+	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k topics"
 	client, err := sarama.NewClient(brokers, config)
 	must(err)

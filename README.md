@@ -22,6 +22,9 @@ Usage: k <command> [options] [arguments]
 
 Environment Variables:
     KAFKA_BROKERS
+    SSL_CA_BUNDLE_PATH
+    SSL_CRT_PATH
+    SSL_KEY_PATH
 
 Commands:
     produce     produce messages to given topic
