@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/bgentry/pflag"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/bgentry/pflag"
 )
 
 type Command struct {
@@ -77,7 +78,14 @@ func runHelp(cmd *Command, args []string) {
 	os.Exit(2)
 }
 
-var commands []*Command
+var (
+	commands  []*Command
+	source    string
+	topic     string
+	partition int32
+	offset    int64
+	n         int
+)
 
 func init() {
 	commands = []*Command{
