@@ -42,7 +42,7 @@ func tlsConfig() (useTLS bool, config *tls.Config, err error) {
 	}
 
 	// if $SSL_CERT_PATH or $SSL_KEY_PATH aren't set, skip client cert
-	certPath, keyPath := os.Getenv("SSL_CERT_PATH"), os.Getenv("SSL_KEY_PATH")
+	certPath, keyPath := os.Getenv("SSL_CRT_PATH"), os.Getenv("SSL_KEY_PATH")
 	if certPath == "" || keyPath == "" {
 		return
 	}
