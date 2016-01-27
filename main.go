@@ -31,6 +31,9 @@ func printOverviewUsage(w io.Writer) {
 	fmt.Fprintf(w, "Usage: k <command> [options] [arguments]\n")
 	fmt.Fprintf(w, "\nEnvironment Variables: \n")
 	fmt.Fprintf(w, "    KAFKA_BROKERS\n")
+	fmt.Fprintf(w, "    SSL_CA_BUNDLE_PATH\n")
+	fmt.Fprintf(w, "    SSL_CRT_PATH\n")
+	fmt.Fprintf(w, "    SSL_KEY_PATH\n")
 	fmt.Fprintf(w, "\nCommands:\n")
 	for _, command := range commands {
 		fmt.Fprintf(w, "    %-8s    %s\n", command.Name(), command.Short)

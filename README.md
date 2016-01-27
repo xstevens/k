@@ -9,7 +9,7 @@ go build
 
 ### Cross-compiling
 
-I typically use gox for cross-compiling. Once it's installed it's really easy to use.
+I typically use [gox](https://github.com/mitchellh/gox) for cross-compiling. Once it's installed it's really easy to use.
 
 ```
 gox -osarch="linux/amd64"
@@ -20,12 +20,17 @@ gox -osarch="linux/amd64"
 $ ./k help
 Usage: k <command> [options] [arguments]
 
-accepted environment var: KAFKA_BROKERS
+Environment Variables:
+    KAFKA_BROKERS
+    SSL_CA_BUNDLE_PATH
+    SSL_CRT_PATH
+    SSL_KEY_PATH
 
 Commands:
     produce     produce messages to given topic
     consume     consume messages from given topic
     offsets     show the oldest and newest offset for a given topic and partition
+    topics      show the list of topics
     help        show help
 
 Run 'k help <command>' for details.

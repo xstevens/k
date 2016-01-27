@@ -27,6 +27,10 @@ Example:
 func runProduce(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
+	useTLS, tlsConfig, err := tlsConfig()
+	must(err)
+	config.Net.TLS.Enable = useTLS
+	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k produce"
 	config.Producer.Return.Successes = true
 	client, err := sarama.NewClient(brokers, config)

@@ -21,6 +21,10 @@ Example:
 func runTopics(cmd *Command, args []string) {
 	brokers := brokers()
 	config := sarama.NewConfig()
+	useTLS, tlsConfig, err := tlsConfig()
+	must(err)
+	config.Net.TLS.Enable = useTLS
+	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k topics"
 	client, err := sarama.NewClient(brokers, config)
 	must(err)
