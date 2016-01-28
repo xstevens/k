@@ -132,7 +132,7 @@ func runConsume(cmd *Command, args []string) {
 
 func init() {
 	cmdConsume.Flag.StringVarP(&topic, "topic", "t", "", "topic to consume")
-	cmdConsume.Flag.Int32VarP(&partition, "partition", "p", 0, "partition to consume")
+	cmdConsume.Flag.Int32VarP(&partition, "partition", "p", -1, "partition to consume")
 	cmdConsume.Flag.Int64VarP(&offset, "offset", "o", 0, "starting offset for consumer")
 	cmdConsume.Flag.IntVarP(&n, "n", "n", -1, "number of messages to consume")
 }
