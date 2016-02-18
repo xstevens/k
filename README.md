@@ -9,10 +9,15 @@ go build
 
 ### Cross-compiling
 
-I typically use [gox](https://github.com/mitchellh/gox) for cross-compiling. Once it's installed it's really easy to use.
+With Go 1.5 or above, cross-compilation support is built-in.
+See [Dave Cheney's blog post](http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5)
+for a tutorial and
+the [golang.org docs](https://golang.org/doc/install/source#environment)
+for details on `GOOS` and `GOARCH` values for various target operating systems.
 
+For example, to build for Linux on x86:
 ```
-gox -osarch="linux/amd64"
+env GOOS=linux GOARCH=386 go build
 ```
 
 ## Usage

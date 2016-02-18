@@ -18,6 +18,9 @@ var cmdProduce = &Command{
 Produces a message to the given topic with the data given by
 reading stdin (newline delimited).
 
+If the message includes a tab character, the content before the
+tab will be interpreted as the message's key.
+
 Example:
 
     $ echo content | k produce --topic foo`,
