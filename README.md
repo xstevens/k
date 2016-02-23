@@ -1,18 +1,46 @@
 # k
 A general command line client for Apache Kafka.
 
-## Build
+## Install
 
 ```
+# Set a directory where Go packages will be installed.
+export GOPATH=$HOME/gocode
+
+# Install `k` and dependencies.
+go get github.com/xstevens/k
+```
+
+This will make `k` available as `$GOPATH/bin/k`.
+Add `$GOPATH/bin` to your `$PATH` to have it available as `k`.
+
+### Build
+
+To run subsequent builds, use `go build`:
+
+```
+# Ensure you're in the `k` source directory.
+cd $GOPATH/src/github.com/xstevens/k
+
+# Run the build.
 go build
 ```
 
 ### Cross-compiling
 
-I typically use [gox](https://github.com/mitchellh/gox) for cross-compiling. Once it's installed it's really easy to use.
+With Go 1.5 or above, cross-compilation support is built in.
+See [Dave Cheney's blog post](http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5)
+for a tutorial and
+the [golang.org docs](https://golang.org/doc/install/source#environment)
+for details on `GOOS` and `GOARCH` values for various target operating systems.
 
+A typical build for Linux would be:
 ```
-gox -osarch="linux/amd64"
+# Ensure you're in the `k` source directory.
+cd $GOPATH/src/github.com/xstevens/k
+
+# Run the build.
+env GOOS=linux GOARCH=amd64 go build
 ```
 
 ## Usage
