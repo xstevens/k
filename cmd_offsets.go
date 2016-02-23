@@ -36,7 +36,7 @@ func runOffsets(cmd *Command, args []string) {
 
 	// print offsets for each partition
 	for _, part := range parts {
-		oldestOffset, newestOffset := offsets(client, topic, 0)
+		oldestOffset, newestOffset := offsets(client, topic, part)
 		must(err)
 		fmt.Printf("partition=%d oldest=%d newest=%d\n", part, oldestOffset, newestOffset)
 	}
