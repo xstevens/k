@@ -71,7 +71,7 @@ func runConsume(cmd *Command, args []string) {
 		// if offset is less than zero we're going to rewind from newest
 		// if offset is greater than zero we'll use the offset as is as long as it
 		// is in range
-        offsetsDelta := newestOffset - oldestOffset
+		offsetsDelta := newestOffset - oldestOffset
 		if offset < 0 && offsetsDelta > 0 {
 			startingOffset = newestOffset + offset
 		} else if offset > 0 && offset >= oldestOffset && offset < newestOffset {
