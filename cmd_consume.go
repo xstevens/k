@@ -71,13 +71,14 @@ func runConsume(cmd *Command, args []string) {
 		// if offset is less than zero we're going to rewind from newest
 		// if offset is greater than zero we'll use the offset as is as long as it
 		// is in range
-		if offset < 0 {
+        offsetsDelta := newestOffset - oldestOffset
+		if offset < 0 && offsetsDelta > 0 {
 			startingOffset = newestOffset + offset
-		} else if offset > 0 && offset >= oldestOffset {
+		} else if offset > 0 && offset >= oldestOffset && offset < newestOffset {
 			startingOffset = offset
 		}
 
-		fmt.Fprintf(os.Stderr, "Using starting offset: %d\n", startingOffset)
+		fmt.Fprintf(os.Stderr, "Partition: %d, using starting offset: %d\n", part, startingOffset)
 		partConsumer, err := consumerLeader.ConsumePartition(topic, part, startingOffset)
 		must(err)
 
@@ -112,7 +113,7 @@ func runConsume(cmd *Command, args []string) {
 				if msg.Key != nil {
 					fmt.Printf("%s\t", string(msg.Key))
 				}
-				fmt.Println(string(msg.Value))
+				fmt.Printf("%s\n", string(msg.Value))
 				received++
 				if n > 0 && received >= n {
 					break printLoop

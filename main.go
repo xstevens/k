@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bgentry/pflag"
+	"github.com/spf13/pflag"
 )
 
 type Command struct {
