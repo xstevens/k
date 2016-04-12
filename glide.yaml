@@ -1,5 +1,5 @@
 package: github.com/xstevens/k
 import:
-- package: github.com/bgentry/pflag
+- package: github.com/spf13/pflag
 - package: gopkg.in/Shopify/sarama.v1
   version: ^1.8.0

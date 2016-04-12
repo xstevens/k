@@ -1,8 +1,6 @@
-hash: 926ce379af216514e49ea5455eb347b279c3e6cc0a1e9d96717d56752bd6643f
-updated: 2016-02-26T16:40:40.056594037-08:00
+hash: ae150a8b4f31d2aab247a128203f06291b176aedc6229c3f1c3f3e9ba4862292
+updated: 2016-04-12T08:18:34.927539414-07:00
 imports:
-- name: github.com/bgentry/pflag
-  version: b008717215c7236e20ca2faaf805e54ba6c1d208
 - name: github.com/eapache/go-resiliency
   version: b86b1ec0dd4209a588dc1285cdd471e73525c0b3
   subpackages:
@@ -13,6 +11,8 @@ imports:
   version: 427fb6fc07997f43afa32f35e850833760e489a7
 - name: github.com/klauspost/crc32
   version: 19b0b332c9e4516a6370a0456e6182c3b5036720
+- name: github.com/spf13/pflag
+  version: 1f296710f879815ad9e6d39d947c828c3e4b4c3d
 - name: gopkg.in/Shopify/sarama.v1
   version: 4ba9bba6adb6697bcec3841e1ecdfecf5227c3b9
 devImports: []
