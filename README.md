@@ -40,7 +40,7 @@ A typical build for Linux would be:
 cd $GOPATH/src/github.com/xstevens/k
 
 # Run the build.
-env GOOS=linux GOARCH=amd64 go build
+GOOS=linux GOARCH=amd64 go build
 ```
 
 ## Usage
