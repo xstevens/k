@@ -116,7 +116,7 @@ func runConsume(cmd *Command, args []string) {
 				fmt.Printf("%s\n", string(msg.Value))
 				received++
 				if n > 0 && received >= n {
-					break printLoop
+					close(closing)
 				}
 			case <-closing:
 				break printLoop
