@@ -50,6 +50,7 @@ func tlsConfig() (useTLS bool, config *tls.Config, err error) {
 	// if $SSL_CERT_PATH or $SSL_KEY_PATH aren't set, skip client cert
 	certPath, keyPath := os.Getenv("SSL_CRT_PATH"), os.Getenv("SSL_KEY_PATH")
 	if certPath == "" || keyPath == "" {
+		fmt.Println("SSL_CRT_PATH or SSL_KEY_PATH was empty!")
 		return
 	}
 
@@ -58,6 +59,8 @@ func tlsConfig() (useTLS bool, config *tls.Config, err error) {
 		err = fmt.Errorf("error reading $SSL_CRT_PATH/$SSL_KEY_PATH: %v", err)
 		return
 	}
+
 	config.Certificates = []tls.Certificate{keypair}
+
 	return
 }

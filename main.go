@@ -96,6 +96,7 @@ func init() {
 		cmdConsume,
 		cmdOffsets,
 		cmdTopics,
+		cmdTLS,
 		cmdHelp,
 	}
 }
