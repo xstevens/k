@@ -94,6 +94,7 @@ func init() {
 	commands = []*Command{
 		cmdProduce,
 		cmdConsume,
+		cmdConsumerGroups,
 		cmdOffsets,
 		cmdTopics,
 		cmdTLS,

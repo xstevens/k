@@ -34,7 +34,7 @@ func runProduce(cmd *Command, args []string) {
 	must(err)
 	config.Net.TLS.Enable = useTLS
 	config.Net.TLS.Config = tlsConfig
-	config.ClientID = "k produce"
+	config.ClientID = "k-produce"
 	config.Producer.Return.Successes = true
 	client, err := sarama.NewClient(brokers, config)
 	must(err)

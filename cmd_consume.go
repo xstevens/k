@@ -28,7 +28,7 @@ func runConsume(cmd *Command, args []string) {
 	must(err)
 	config.Net.TLS.Enable = useTLS
 	config.Net.TLS.Config = tlsConfig
-	config.ClientID = "k consume"
+	config.ClientID = "k-consume"
 	config.Consumer.Return.Errors = true
 	client, err := sarama.NewClient(brokers, config)
 	must(err)
