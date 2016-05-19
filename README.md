@@ -5,7 +5,7 @@ A general command line client for Apache Kafka.
 
 ```
 # Set a directory where Go packages will be installed.
-export GOPATH=$HOME/gocode
+export GOPATH=$HOME/go
 
 # Install `k` and dependencies.
 go get github.com/xstevens/k
@@ -30,8 +30,7 @@ go build
 
 With Go 1.5 or above, cross-compilation support is built in.
 See [Dave Cheney's blog post](http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5)
-for a tutorial and
-the [golang.org docs](https://golang.org/doc/install/source#environment)
+for a tutorial and the [golang.org docs](https://golang.org/doc/install/source#environment)
 for details on `GOOS` and `GOARCH` values for various target operating systems.
 
 A typical build for Linux would be:
@@ -57,8 +56,10 @@ Environment Variables:
 Commands:
     produce     produce messages to given topic
     consume     consume messages from given topic
+    consumers    list all consumer groups
     offsets     show the oldest and newest offset for a given topic and partition
     topics      show the list of topics
+    tls         connect to broker using Transport Layer Security
     help        show help
 
 Run 'k help <command>' for details.
