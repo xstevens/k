@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/spf13/pflag"
+	"gopkg.in/Shopify/sarama.v1"
 )
 
 type Command struct {
@@ -30,7 +31,7 @@ func (c *Command) Name() string {
 func printOverviewUsage(w io.Writer) {
 	fmt.Fprintf(w, "Usage: k <command> [options] [arguments]\n")
 	fmt.Fprintf(w, "\nEnvironment Variables: \n")
-	fmt.Fprintf(w, "    KAFKA_BROKERS\n")
+	fmt.Fprintf(w, "    KAFKA_BROKERS or TLS_KAFKA_BROKERS\n")
 	fmt.Fprintf(w, "    SSL_CA_BUNDLE_PATH\n")
 	fmt.Fprintf(w, "    SSL_CRT_PATH\n")
 	fmt.Fprintf(w, "    SSL_KEY_PATH\n")
@@ -82,12 +83,14 @@ func runHelp(cmd *Command, args []string) {
 }
 
 var (
-	commands  []*Command
-	source    string
-	topic     string
-	partition int32
-	offset    int64
-	n         int
+	commands     []*Command
+	source       string
+	topic        string
+	partition    int32
+	offset       int64
+	n            int
+	version      string
+	kafkaVersion sarama.KafkaVersion
 )
 
 func init() {
@@ -100,6 +103,7 @@ func init() {
 		cmdTLS,
 		cmdHelp,
 	}
+	kafkaVersion = getKafkaVersion(version)
 }
 
 func main() {

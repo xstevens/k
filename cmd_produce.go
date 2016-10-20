@@ -28,10 +28,11 @@ Example:
 }
 
 func runProduce(cmd *Command, args []string) {
-	brokers := brokers()
 	config := sarama.NewConfig()
+	config.Version = kafkaVersion
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
+	brokers := brokers(useTLS)
 	config.Net.TLS.Enable = useTLS
 	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k-produce"

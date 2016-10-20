@@ -44,10 +44,9 @@ func printConnectionState(connState tls.ConnectionState) {
 }
 
 func runTLS(cmd *Command, args []string) {
-	brokers := brokers()
-
-	_, tlsConfig, err := tlsConfig()
+	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
+	brokers := brokers(useTLS)
 
 	fmt.Printf("Number of Certificates: %d\n", len(tlsConfig.Certificates))
 
@@ -62,7 +61,7 @@ func runTLS(cmd *Command, args []string) {
 		fmt.Fprintf(os.Stderr, "Failed to handshake: %v\n", err)
 		return
 	}
-	
+
 	printConnectionState(conn.ConnectionState())
 
 	fmt.Println("TLS check done.")

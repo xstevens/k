@@ -1,22 +1,24 @@
 hash: d9b89b0870c0d54c27cae93a647330d5f13d34bcec7f094781c505eb052b1ca0
-updated: 2016-05-19T11:42:23.296622872-07:00
+updated: 2016-10-19T15:37:21.947005311-07:00
 imports:
 - name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
   version: b86b1ec0dd4209a588dc1285cdd471e73525c0b3
   subpackages:
   - breaker
+- name: github.com/eapache/go-xerial-snappy
+  version: bb955e01b9346ac19dc29eb16586c90ded99a98c
 - name: github.com/eapache/queue
-  version: ded5959c0d4e360646dc9e9908cff48666781367
+  version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
 - name: github.com/golang/snappy
-  version: 427fb6fc07997f43afa32f35e850833760e489a7
+  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
 - name: github.com/klauspost/crc32
-  version: 19b0b332c9e4516a6370a0456e6182c3b5036720
+  version: cb6bfca970f6908083f26f39a79009d608efd5cd
 - name: github.com/spf13/pflag
-  version: cb88ea77998c3f024757528e3305022ab50b43be
+  version: dabebe21bf790f782ea4c7bbd2efc430de182afd
 - name: gopkg.in/Shopify/sarama.v1
-  version: 38d579a708d2f87dd4e35342241048e361d1e66a
-devImports: []
+  version: bd61cae2be85fa6ff40eb23dcdd24567967ac2ae
+testImports: []

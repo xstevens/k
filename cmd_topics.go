@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 
 	"gopkg.in/Shopify/sarama.v1"
 )
@@ -19,10 +20,11 @@ Example:
 }
 
 func runTopics(cmd *Command, args []string) {
-	brokers := brokers()
 	config := sarama.NewConfig()
+	config.Version = kafkaVersion
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
+	brokers := brokers(useTLS)
 	config.Net.TLS.Enable = useTLS
 	config.Net.TLS.Config = tlsConfig
 	config.ClientID = "k-topics"
@@ -33,6 +35,7 @@ func runTopics(cmd *Command, args []string) {
 	// get list of topics
 	topics, err := client.Topics()
 	must(err)
+	sort.Strings(topics)
 	for _, topic := range topics {
 		fmt.Println(topic)
 	}

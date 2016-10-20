@@ -48,7 +48,7 @@ $ ./k help
 Usage: k <command> [options] [arguments]
 
 Environment Variables:
-    KAFKA_BROKERS
+    KAFKA_BROKERS or TLS_KAFKA_BROKERS
     SSL_CA_BUNDLE_PATH
     SSL_CRT_PATH
     SSL_KEY_PATH

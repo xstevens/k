@@ -11,8 +11,13 @@ import (
 	"gopkg.in/Shopify/sarama.v1"
 )
 
-func brokers() []string {
-	s := os.Getenv("KAFKA_BROKERS")
+func brokers(useTLS bool) []string {
+	var s string
+	if useTLS {
+		s = os.Getenv("TLS_KAFKA_BROKERS")
+	} else {
+		s = os.Getenv("KAFKA_BROKERS")
+	}
 	if s == "" {
 		s = "127.0.0.1:9092"
 	}
@@ -62,5 +67,19 @@ func tlsConfig() (useTLS bool, config *tls.Config, err error) {
 
 	config.Certificates = []tls.Certificate{keypair}
 
+	return
+}
+
+func getKafkaVersion(version string) (v sarama.KafkaVersion) {
+	switch version {
+	case "0.9.0.0":
+		v = sarama.V0_9_0_0
+	case "0.9.0.1":
+		v = sarama.V0_9_0_1
+	case "0.10.0.0":
+		v = sarama.V0_10_0_0
+	default:
+		v = sarama.V0_10_0_0
+	}
 	return
 }
