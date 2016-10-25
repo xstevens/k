@@ -9,27 +9,28 @@ import (
 	"sync"
 
 	"gopkg.in/Shopify/sarama.v1"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var cmdProduce = &Command{
-	Usage: "produce --topic <topic>",
-	Short: "produce messages to given topic",
-	Long: `
-Produces a message to the given topic with the data given by
-reading stdin (newline delimited).
-
-If the message includes a tab character, the content before the
-tab will be interpreted as the message's key.
-
-Example:
-
-    $ echo content | k produce --topic foo`,
-	Run: runProduce,
+type ProduceCommand struct {
+	ApiVersion string
+	Topic      string
 }
 
-func runProduce(cmd *Command, args []string) {
+func configureProduceCommand(app *kingpin.Application) {
+	pc := &ProduceCommand{}
+	produce := app.Command("produce", `Produces a message to the given topic with the data given by 
+reading stdin (newline delimited). 
+
+If the message includes a tab character, the content before the 
+tab will be interpreted as the message's key.`).Action(pc.runProduce)
+	produce.Flag("apiversion", "the Kafka API version to use").StringVar(&pc.ApiVersion)
+	produce.Flag("topic", "get offsets for topic").Short('t').Required().StringVar(&pc.Topic)
+}
+
+func (pc *ProduceCommand) runProduce(ctx *kingpin.ParseContext) error {
 	config := sarama.NewConfig()
-	config.Version = kafkaVersion
+	config.Version = getKafkaVersion(pc.ApiVersion)
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
 	brokers := brokers(useTLS)
@@ -75,9 +76,9 @@ producerLoop:
 		idx := strings.Index(line, "\t")
 		var msg *sarama.ProducerMessage
 		if idx > 0 {
-			msg = &sarama.ProducerMessage{Topic: topic, Key: sarama.ByteEncoder(line[0:idx]), Value: sarama.ByteEncoder(line[idx+1:])}
+			msg = &sarama.ProducerMessage{Topic: pc.Topic, Key: sarama.ByteEncoder(line[0:idx]), Value: sarama.ByteEncoder(line[idx+1:])}
 		} else {
-			msg = &sarama.ProducerMessage{Topic: topic, Key: nil, Value: sarama.ByteEncoder(line)}
+			msg = &sarama.ProducerMessage{Topic: pc.Topic, Key: nil, Value: sarama.ByteEncoder(line)}
 		}
 		select {
 		case producer.Input() <- msg:
@@ -90,8 +91,6 @@ producerLoop:
 	producer.AsyncClose()
 	wg.Wait()
 	fmt.Fprintf(os.Stderr, "messages produced: %d, errors: %d\n", successes, errors)
-}
 
-func init() {
-	cmdProduce.Flag.StringVarP(&topic, "topic", "t", "", "produce to topic")
+	return nil
 }

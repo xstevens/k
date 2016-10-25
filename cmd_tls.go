@@ -2,21 +2,19 @@ package main
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"os"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var cmdTLS = &Command{
-	Usage: "tls",
-	Short: "connect to broker using Transport Layer Security",
-	Long: `
-Connects to broker using Transport Layer Security which can be useful for TLS
-handshake debugging.
+type TLSCommand struct {
+}
 
-Example:
-
-    $ k tls`,
-	Run: runTLS,
+func configureTLSCommand(app *kingpin.Application) {
+	tc := &TLSCommand{}
+	app.Command("tls", "Connects to broker using Transport Layer Security which can be useful for TLS handshake debugging.").Action(tc.runTLS)
 }
 
 func printConnectionState(connState tls.ConnectionState) {
@@ -43,29 +41,31 @@ func printConnectionState(connState tls.ConnectionState) {
 	fmt.Printf("CipherSuite: %#x\n", connState.CipherSuite)
 }
 
-func runTLS(cmd *Command, args []string) {
+func (tc *TLSCommand) runTLS(ctx *kingpin.ParseContext) error {
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
 	brokers := brokers(useTLS)
+
+	if tlsConfig == nil || len(tlsConfig.Certificates) == 0 {
+		return errors.New("No certificates were loaded")
+	}
 
 	fmt.Printf("Number of Certificates: %d\n", len(tlsConfig.Certificates))
 
 	conn, err := tls.Dial("tcp", brokers[0], tlsConfig)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to connect with TCP client: %v\n", err)
-		return
+		return err
 	}
 	defer conn.Close()
 
 	if err := conn.Handshake(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to handshake: %v\n", err)
-		return
+		return err
 	}
 
 	printConnectionState(conn.ConnectionState())
 
 	fmt.Println("TLS check done.")
-}
-
-func init() {
+	return nil
 }

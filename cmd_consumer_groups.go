@@ -6,23 +6,22 @@ import (
 	"strings"
 
 	"gopkg.in/Shopify/sarama.v1"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var cmdConsumerGroups = &Command{
-	Usage: "consumers",
-	Short: "list all consumer groups",
-	Long: `
-Gets a list of all consumer groups from brokers. (0.9.x compatible only)
-
-Example:
-
-    $ k consumers`,
-	Run: runConsumerGroups,
+type ConsumerGroupsCommand struct {
+	ApiVersion string
 }
 
-func runConsumerGroups(cmd *Command, args []string) {
+func configureConsumerGroupsCommand(app *kingpin.Application) {
+	cgc := &ConsumerGroupsCommand{}
+	consumerGroups := app.Command("consumers", "Gets a list of all consumer groups from brokers. (0.9+ compatible only)").Action(cgc.runConsumerGroups)
+	consumerGroups.Flag("apiversion", "the Kafka API version to use").StringVar(&cgc.ApiVersion)
+}
+
+func (cgc *ConsumerGroupsCommand) runConsumerGroups(ctx *kingpin.ParseContext) error {
 	config := sarama.NewConfig()
-	config.Version = kafkaVersion
+	config.Version = getKafkaVersion(cgc.ApiVersion)
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
 	brokers := brokers(useTLS)
@@ -86,7 +85,6 @@ func runConsumerGroups(cmd *Command, args []string) {
 			}
 		}
 	}
-}
 
-func init() {
+	return nil
 }

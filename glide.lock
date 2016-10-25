@@ -1,6 +1,12 @@
-hash: d9b89b0870c0d54c27cae93a647330d5f13d34bcec7f094781c505eb052b1ca0
-updated: 2016-10-19T15:37:21.947005311-07:00
+hash: db257723c3443a85d5caf30c8f313a3b8784c2ea217074d9f3d88134a1533a78
+updated: 2016-10-25T14:49:34.244642405-07:00
 imports:
+- name: github.com/alecthomas/template
+  version: a0175ee3bccc567396460bf5acd36800cb10c49c
+  subpackages:
+  - parse
+- name: github.com/alecthomas/units
+  version: 2efee857e7cfd4f3d0138cc3cbb1b4966962b93a
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
@@ -17,8 +23,8 @@ imports:
   version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
 - name: github.com/klauspost/crc32
   version: cb6bfca970f6908083f26f39a79009d608efd5cd
-- name: github.com/spf13/pflag
-  version: dabebe21bf790f782ea4c7bbd2efc430de182afd
+- name: gopkg.in/alecthomas/kingpin.v2
+  version: e9044be3ab2a8e11d4e1f418d12f0790d57e8d70
 - name: gopkg.in/Shopify/sarama.v1
   version: bd61cae2be85fa6ff40eb23dcdd24567967ac2ae
 testImports: []

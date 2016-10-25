@@ -7,23 +7,30 @@ import (
 	"sync"
 
 	"gopkg.in/Shopify/sarama.v1"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var cmdConsume = &Command{
-	Usage: "consume --topic <topic> [--partition <partition>] [--offset <offset>] [-n <n_messages>]",
-	Short: "consume messages from given topic",
-	Long: `
-Consumes messages from the given topic and writes them to stdout.
-
-Example:
-
-    $ k consume --topic foo`,
-	Run: runConsume,
+type ConsumeCommand struct {
+	ApiVersion string
+	Topic      string
+	Partition  int32
+	Offset     int64
+	N          int
 }
 
-func runConsume(cmd *Command, args []string) {
+func configureConsumeCommand(app *kingpin.Application) {
+	cc := &ConsumeCommand{}
+	consume := app.Command("consume", "Consumes messages from the given topic and writes them to stdout.").Action(cc.runConsume)
+	consume.Flag("apiversion", "the Kafka API version to use").StringVar(&cc.ApiVersion)
+	consume.Flag("topic", "topic to consume").Short('t').Required().StringVar(&cc.Topic)
+	consume.Flag("partition", "partition to consume").Short('p').Default("-1").Int32Var(&cc.Partition)
+	consume.Flag("offset", "starting offset for consumer").Short('o').Default("0").Int64Var(&cc.Offset)
+	consume.Flag("nmessages", "number of messages to consume").Short('n').Default("-1").IntVar(&cc.N)
+}
+
+func (cc *ConsumeCommand) runConsume(ctx *kingpin.ParseContext) error {
 	config := sarama.NewConfig()
-	config.Version = kafkaVersion
+	config.Version = getKafkaVersion(cc.ApiVersion)
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
 	brokers := brokers(useTLS)
@@ -56,31 +63,31 @@ func runConsume(cmd *Command, args []string) {
 
 	// get the list of partitions unless a specific one was specified
 	var partitions []int32
-	if partition < 0 {
-		partitions, err = client.Partitions(topic)
+	if cc.Partition < 0 {
+		partitions, err = client.Partitions(cc.Topic)
 		must(err)
 	} else {
 		partitions = make([]int32, 1)
-		partitions[0] = partition
+		partitions[0] = cc.Partition
 	}
 
 	for _, part := range partitions {
 		// calculate a starting offset
-		oldestOffset, newestOffset := offsets(client, topic, part)
+		oldestOffset, newestOffset := offsets(client, cc.Topic, part)
 		must(err)
 		startingOffset := newestOffset
 		// if offset is less than zero we're going to rewind from newest
 		// if offset is greater than zero we'll use the offset as is as long as it
 		// is in range
 		offsetsDelta := newestOffset - oldestOffset
-		if offset < 0 && offsetsDelta > 0 {
-			startingOffset = newestOffset + offset
-		} else if offset > 0 && offset >= oldestOffset && offset < newestOffset {
-			startingOffset = offset
+		if cc.Offset < 0 && offsetsDelta > 0 {
+			startingOffset = newestOffset + cc.Offset
+		} else if cc.Offset > 0 && cc.Offset >= oldestOffset && cc.Offset < newestOffset {
+			startingOffset = cc.Offset
 		}
 
 		fmt.Fprintf(os.Stderr, "Partition: %d, using starting offset: %d\n", part, startingOffset)
-		partConsumer, err := consumerLeader.ConsumePartition(topic, part, startingOffset)
+		partConsumer, err := consumerLeader.ConsumePartition(cc.Topic, part, startingOffset)
 		must(err)
 
 		go func(pc sarama.PartitionConsumer) {
@@ -116,7 +123,7 @@ func runConsume(cmd *Command, args []string) {
 				}
 				fmt.Printf("%s\n", string(msg.Value))
 				received++
-				if n > 0 && received >= n {
+				if cc.N > 0 && received >= cc.N {
 					close(closing)
 				}
 			case <-closing:
@@ -130,11 +137,6 @@ func runConsume(cmd *Command, args []string) {
 	fmt.Fprintln(os.Stderr, "Consumers finished.")
 	close(messages)
 	fmt.Fprintln(os.Stderr, "Exiting.")
-}
 
-func init() {
-	cmdConsume.Flag.StringVarP(&topic, "topic", "t", "", "topic to consume")
-	cmdConsume.Flag.Int32VarP(&partition, "partition", "p", -1, "partition to consume")
-	cmdConsume.Flag.Int64VarP(&offset, "offset", "o", 0, "starting offset for consumer")
-	cmdConsume.Flag.IntVarP(&n, "n", "n", -1, "number of messages to consume")
+	return nil
 }

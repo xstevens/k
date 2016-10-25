@@ -5,23 +5,22 @@ import (
 	"sort"
 
 	"gopkg.in/Shopify/sarama.v1"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var cmdTopics = &Command{
-	Usage: "topics",
-	Short: "show the list of topics",
-	Long: `
-Prints the list of topics to stdout.
-
-Example:
-
-    $ k topics`,
-	Run: runTopics,
+type TopicsCommand struct {
+	ApiVersion string
 }
 
-func runTopics(cmd *Command, args []string) {
+func configureTopicsCommand(app *kingpin.Application) {
+	tc := &TopicsCommand{}
+	topics := app.Command("topics", "Prints the list of topics to stdout.").Action(tc.runTopics)
+	topics.Flag("apiversion", "the Kafka API version to use").StringVar(&tc.ApiVersion)
+}
+
+func (tc *TopicsCommand) runTopics(ctx *kingpin.ParseContext) error {
 	config := sarama.NewConfig()
-	config.Version = kafkaVersion
+	config.Version = getKafkaVersion(tc.ApiVersion)
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
 	brokers := brokers(useTLS)
@@ -39,4 +38,6 @@ func runTopics(cmd *Command, args []string) {
 	for _, topic := range topics {
 		fmt.Println(topic)
 	}
+
+	return nil
 }

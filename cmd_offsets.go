@@ -4,23 +4,24 @@ import (
 	"fmt"
 
 	"gopkg.in/Shopify/sarama.v1"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var cmdOffsets = &Command{
-	Usage: "offsets --topic <topic>",
-	Short: "show the oldest and newest offset for a given topic and partition",
-	Long: `
-Prints oldest and newest offsets for the given topic to stdout.
-
-Example:
-
-    $ k offsets --topic foo`,
-	Run: runOffsets,
+type OffsetsCommand struct {
+	ApiVersion string
+	Topic      string
 }
 
-func runOffsets(cmd *Command, args []string) {
+func configureOffsetsCommand(app *kingpin.Application) {
+	oc := &OffsetsCommand{}
+	offsets := app.Command("offsets", "Prints oldest and newest offsets for the given topic to stdout.").Action(oc.runOffsets)
+	offsets.Flag("apiversion", "the Kafka API version to use").StringVar(&oc.ApiVersion)
+	offsets.Flag("topic", "get offsets for topic").Short('t').Required().StringVar(&oc.Topic)
+}
+
+func (oc *OffsetsCommand) runOffsets(ctx *kingpin.ParseContext) error {
 	config := sarama.NewConfig()
-	config.Version = kafkaVersion
+	config.Version = getKafkaVersion(oc.ApiVersion)
 	useTLS, tlsConfig, err := tlsConfig()
 	must(err)
 	brokers := brokers(useTLS)
@@ -32,16 +33,14 @@ func runOffsets(cmd *Command, args []string) {
 	defer client.Close()
 
 	// get partitions for topic
-	parts, err := client.Partitions(topic)
+	parts, err := client.Partitions(oc.Topic)
 	must(err)
 
 	// print offsets for each partition
 	for _, part := range parts {
-		oldestOffset, newestOffset := offsets(client, topic, part)
+		oldestOffset, newestOffset := offsets(client, oc.Topic, part)
 		fmt.Printf("partition=%d oldest=%d newest=%d\n", part, oldestOffset, newestOffset)
 	}
-}
 
-func init() {
-	cmdOffsets.Flag.StringVarP(&topic, "topic", "t", "k", "get offsets for topic")
+	return nil
 }

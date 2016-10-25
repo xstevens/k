@@ -1,5 +1,4 @@
 package: github.com/xstevens/k
 import:
-- package: github.com/spf13/pflag
+- package: gopkg.in/alecthomas/kingpin.v2
 - package: gopkg.in/Shopify/sarama.v1
-  version: ^1.9.0
