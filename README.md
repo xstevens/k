@@ -1,3 +1,6 @@
+# NOTE
+I wrote this a few years back before [kafkacat](https://github.com/edenhill/kafkacat) had some of the features that it has now. I would highly recommend using it instead. This project is unmaintained.
+
 # k
 A general command line client for Apache Kafka.
 
